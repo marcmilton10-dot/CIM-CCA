@@ -11,3 +11,32 @@
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
+async function uploadFile(file) {
+  // Convert file to base64
+  const reader = new FileReader();
+  reader.readAsDataURL(file);
+  
+  reader.onload = async () => {
+    const base64Data = reader.result.split(',')[1];
+    
+    const response = await fetch('/.netlify/functions/upload', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        fileName: file.name,
+        fileType: file.type,
+        fileData: base64Data
+      })
+    });
+
+    const result = await response.json();
+    
+    if (response.ok) {
+      alert('✅ File uploaded successfully to AWS S3!');
+      console.log('File URL:', result.url);
+    } else {
+      alert('❌ Upload failed: ' + result.error);
+    }
+  };
+}
+
